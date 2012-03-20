@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+#if TOUCH
+using Microsoft.Xna.Framework.Input.Touch;
+#endif
 
 namespace WrapTest
 {
@@ -79,7 +82,11 @@ namespace WrapTest
 			// Allows the game to exit
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
 				this.Exit();
-
+			
+#if TOUCH
+			if (TouchPanel.GetState().Any(t => t.State == TouchLocationState.Pressed))
+				_mode = (_mode + 1) % 4;
+#else
 			var spacePressed = Keyboard.GetState().IsKeyDown(Keys.Space);
 
 			if (spacePressed && !_spaceWasPressed)
@@ -88,7 +95,7 @@ namespace WrapTest
 			}
 
 			_spaceWasPressed = spacePressed;
-
+#endif
 			// TODO: Add your update logic here
 
 			base.Update(gameTime);
