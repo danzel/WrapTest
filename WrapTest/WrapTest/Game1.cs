@@ -79,6 +79,7 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
+#if !PSS
 			// Allows the game to exit
 			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
 				this.Exit();
@@ -100,48 +101,74 @@ namespace WrapTest
 
 			base.Update(gameTime);
 		}
-
+		
+		DateTime _firstDrawTime;
+		int _drawCount = 0;
+		
+		double _first60fps;
 		/// <summary>
 		/// This is called when the game should draw itself.
 		/// </summary>
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
+			if (_drawCount == 0)
+				_firstDrawTime = DateTime.Now;
+			_drawCount ++;
+			if (_drawCount == 60)
+			{
+				DateTime end = DateTime.Now;
+				TimeSpan timeTaken = end - _firstDrawTime;
+				_first60fps = 60 / timeTaken.TotalSeconds;
+				
+				_firstDrawTime = end;
+			}
+			if (_drawCount == 120)
+			{
+				DateTime end = DateTime.Now;
+				TimeSpan timeTaken = end - _firstDrawTime;
+				
+				var first = _first60fps;
+				var second = 60 / timeTaken.TotalSeconds;
+			}
+			
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			Texture2D texture = (_mode % 2 == 0) ? _checkers60 : _checkers64;
-
-			if (_mode < 2) //Without matrix
-				spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null);
-			else //With matrix to rotate whole screen 180
-				spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null, null, Matrix.CreateRotationZ(MathHelper.ToRadians(180)) * Matrix.CreateTranslation(480, 320, 0));
-
-			var size = new Vector2(texture.Width, texture.Height);
-
-			//Plain
-			spriteBatch.Draw(texture, new Vector2(5, 5), new Rectangle(0, 0, (int)size.X, (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-			//2x across
-			spriteBatch.Draw(texture, new Vector2(5, 10 + size.Y), new Rectangle(0, 0, (int)size.X * 2, (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-			//2x down
-			spriteBatch.Draw(texture, new Vector2(5, 15 + 2 *size.Y), new Rectangle(0, 0, (int)size.X, (int)size.Y * 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-			//2x2 down
-			spriteBatch.Draw(texture, new Vector2(10 + size.X, 15 + 2 * size.Y), new Rectangle(0, 0, (int)size.X * 2, (int)size.Y * 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-			//1.5 across
-			spriteBatch.Draw(texture, new Vector2(10 + size.X, 5), new Rectangle(0, 0, (int)(size.X * 1.5f), (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-			//1.5 down
-			spriteBatch.Draw(texture, new Vector2(15 + 2.5f * size.X, 5), new Rectangle(0, 0, (int)size.X, (int)(size.Y * 1.5f)), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-			//1.5x1.5
-			spriteBatch.Draw(texture, new Vector2(20 + 3.5f * size.X, 5), new Rectangle(0, 0, (int)(size.X * 1.5f), (int)(size.Y * 1.5f)), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
-
-			spriteBatch.End();
-
+			
+			//for (int i = 0; i < 10; i++)
+			{
+				if (_mode < 2) //Without matrix
+					spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null);
+				else //With matrix to rotate whole screen 180
+					spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null, null, Matrix.CreateRotationZ(MathHelper.ToRadians(180)) * Matrix.CreateTranslation(480, 320, 0));
+	
+				var size = new Vector2(texture.Width, texture.Height);
+	
+				//Plain
+				spriteBatch.Draw(texture, new Vector2(5, 5), new Rectangle(0, 0, (int)size.X, (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+				//2x across
+				spriteBatch.Draw(texture, new Vector2(5, 10 + size.Y), new Rectangle(0, 0, (int)size.X * 2, (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+				//2x down
+				spriteBatch.Draw(texture, new Vector2(5, 15 + 2 *size.Y), new Rectangle(0, 0, (int)size.X, (int)size.Y * 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+				//2x2 down
+				spriteBatch.Draw(texture, new Vector2(10 + size.X, 15 + 2 * size.Y), new Rectangle(0, 0, (int)size.X * 2, (int)size.Y * 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+				//1.5 across
+				spriteBatch.Draw(texture, new Vector2(10 + size.X, 5), new Rectangle(0, 0, (int)(size.X * 1.5f), (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+				//1.5 down
+				spriteBatch.Draw(texture, new Vector2(15 + 2.5f * size.X, 5), new Rectangle(0, 0, (int)size.X, (int)(size.Y * 1.5f)), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+				//1.5x1.5
+				spriteBatch.Draw(texture, new Vector2(20 + 3.5f * size.X, 5), new Rectangle(0, 0, (int)(size.X * 1.5f), (int)(size.Y * 1.5f)), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+	
+	
+				spriteBatch.End();
+			}
 			// TODO: Add your drawing code here
 
 			base.Draw(gameTime);

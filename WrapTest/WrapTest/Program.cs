@@ -2,7 +2,7 @@ using System;
 
 namespace WrapTest
 {
-#if WINDOWS || XBOX
+#if WINDOWS || XBOX || PSS
     static class Program
     {
         /// <summary>
