@@ -97,6 +97,7 @@ namespace WrapTest
 
 			_spaceWasPressed = spacePressed;
 #endif
+#endif
 			// TODO: Add your update logic here
 
 			base.Update(gameTime);
