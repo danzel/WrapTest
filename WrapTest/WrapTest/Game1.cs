@@ -184,6 +184,7 @@ namespace WrapTest
 			GraphicsDevice.GetBackBufferData(screenData);
 			//This returns the screen in BGRA format in XNA
 
+#if !(WINDOWS && DIRECTX)
 			//In XNA we need to swap the R and B bytes so we are in RGBA
 			for (var i = 0; i < screenData.Length; i += 4)
 			{
@@ -191,6 +192,7 @@ namespace WrapTest
 				screenData[i] = screenData[i + 2];
 				screenData[i + 2] = temp;
 			}
+#endif
 
 			using (var bitmap = new Bitmap(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height))
 			{
