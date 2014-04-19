@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -8,6 +11,9 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Color = Microsoft.Xna.Framework.Color;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
 #if TOUCH
 using Microsoft.Xna.Framework.Input.Touch;
 #endif
@@ -173,6 +179,29 @@ namespace WrapTest
 			// TODO: Add your drawing code here
 
 			base.Draw(gameTime);
+			
+			byte[] screenData = new byte[GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height * 4];
+			GraphicsDevice.GetBackBufferData(screenData);
+			//This returns the screen in BGRA format in XNA
+
+			//In XNA we need to swap the R and B bytes so we are in RGBA
+			for (var i = 0; i < screenData.Length; i += 4)
+			{
+				byte temp = screenData[i];
+				screenData[i] = screenData[i + 2];
+				screenData[i + 2] = temp;
+			}
+
+			using (var bitmap = new Bitmap(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height))
+			{
+				var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb); //This is actually RGBA byte format
+
+				Marshal.Copy(screenData, 0, data.Scan0, screenData.Length);
+
+				bitmap.UnlockBits(data);
+
+				bitmap.Save("out.png", ImageFormat.Png);
+			}
 		}
 	}
 }
