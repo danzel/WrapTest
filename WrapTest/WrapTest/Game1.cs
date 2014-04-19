@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
@@ -13,6 +12,15 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Color = Microsoft.Xna.Framework.Color;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
+#if IOS
+using MonoTouch.UIKit;
+using MonoTouch.CoreGraphics;
+#endif
+
+#if WINDOWS
+using System.Drawing.Imaging;
+#endif
 
 #if TOUCH
 using Microsoft.Xna.Framework.Input.Touch;
@@ -28,7 +36,7 @@ namespace WrapTest
 		GraphicsDeviceManager graphics;
 		SpriteBatch spriteBatch;
 
-		private int _mode;
+		private int _mode = 1;
 		private Texture2D _checkers60;
 		private Texture2D _checkers64;
 
@@ -184,8 +192,9 @@ namespace WrapTest
 			GraphicsDevice.GetBackBufferData(screenData);
 			//This returns the screen in BGRA format in XNA
 
+#if WINDOWS
 #if !(WINDOWS && DIRECTX)
-			//In XNA we need to swap the R and B bytes so we are in RGBA
+			//In XNA and MonoGame.OpenGL we need to swap the R and B bytes so we are in RGBA
 			for (var i = 0; i < screenData.Length; i += 4)
 			{
 				byte temp = screenData[i];
@@ -204,6 +213,17 @@ namespace WrapTest
 
 				bitmap.Save("out.png", ImageFormat.Png);
 			}
+#endif
+
+#if IOS
+			using (var colorSpace = CGColorSpace.CreateDeviceRGB())
+			using (var provider = new CGDataProvider(screenData, 0, screenData.Length))
+			using (var cgImage = new CGImage(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 8, 4 * 8, 4 * GraphicsDevice.Viewport.Width, colorSpace, CGBitmapFlags.ByteOrderDefault, provider, null, false, CGColorRenderingIntent.Default))
+			using (var image = UIImage.FromImage(cgImage))
+			{
+				image.SaveToPhotosAlbum(null);
+			}
+#endif
 		}
 	}
 }
