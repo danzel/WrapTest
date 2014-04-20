@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
@@ -11,7 +12,14 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Color = Microsoft.Xna.Framework.Color;
+using File = System.IO.File;
+using Matrix = Microsoft.Xna.Framework.Matrix;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
+
+#if ANDROID
+using Android.Graphics;
+using Java.Nio;
+#endif
 
 #if IOS
 using MonoTouch.UIKit;
@@ -222,6 +230,22 @@ namespace WrapTest
 			using (var image = UIImage.FromImage(cgImage))
 			{
 				image.SaveToPhotosAlbum(null);
+			}
+#endif
+
+#if ANDROID
+			using (var buffer = ByteBuffer.Wrap(screenData))
+			using (var bitmap = Bitmap.CreateBitmap(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, Bitmap.Config.Argb8888))
+			{
+				bitmap.CopyPixelsFromBuffer(buffer);
+
+				var filename = System.IO.Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, "out.png");
+
+				//Make sure you have <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+				using (var output = File.OpenWrite(filename))
+				{
+					bitmap.Compress(Bitmap.CompressFormat.Png, 100, output);
+				}
 			}
 #endif
 		}
