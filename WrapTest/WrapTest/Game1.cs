@@ -79,7 +79,9 @@ namespace WrapTest
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
+#if !WINDOWS_PHONE //Loading 2 textures from .png fails on Windows phone, since we are a hack job just load one
 			_checkers60 = Content.Load<Texture2D>("Checkers60");
+#endif
 			_checkers64 = Content.Load<Texture2D>("Checkers64");
 		}
 
