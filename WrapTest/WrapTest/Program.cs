@@ -1,9 +1,9 @@
 using System;
-
 #if ANDROID
 using Android.App;
 using Android.Content.PM;
 using Android.OS;
+using Android.Views;
 #endif
 
 namespace WrapTest
@@ -30,9 +30,8 @@ namespace WrapTest
 		{
 			base.OnCreate(bundle);
 
-			Microsoft.Xna.Framework.Game.Activity = this;
 			var g = new Game1();
-			SetContentView(g.Window);
+			SetContentView((View)g.Services.GetService(typeof(View)));
 			g.Run();
 		}
 	}
