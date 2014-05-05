@@ -53,8 +53,11 @@ namespace WrapTest
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// TODO: use this.Content to load your game content here
-			_checkers64 = Content.Load<Texture2D>("Checkers64");
+			new System.Threading.Thread(delegate()
+			{
+				// TODO: use this.Content to load your game content here
+				_checkers64 = Content.Load<Texture2D>("Checkers64");
+			}).Start();
 		}
 
 		/// <summary>
@@ -89,13 +92,14 @@ namespace WrapTest
 		{
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
-			Texture2D texture =  _checkers64;
-			
-			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
-	
-			spriteBatch.Draw(texture, new Vector2(5, 5), null, Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
-	
-			spriteBatch.End();
+			if (_checkers64 != null)
+			{
+				spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
+
+				spriteBatch.Draw(_checkers64, new Vector2(5, 5), null, Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
+
+				spriteBatch.End();
+			}
 
 			base.Draw(gameTime);
 		}
