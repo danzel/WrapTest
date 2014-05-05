@@ -19,9 +19,10 @@ namespace WrapTest
 	public class Game1 : Microsoft.Xna.Framework.Game
 	{
 		GraphicsDeviceManager graphics;
-		SpriteBatch spriteBatch;
 
-		private Texture2D _checkers64;
+		private RenderTarget2D renderTarget;
+		private SpriteBatch m_spriteBatch;
+		private Texture2D texture;
 
 		public Game1()
 		{
@@ -51,10 +52,15 @@ namespace WrapTest
 		protected override void LoadContent()
 		{
 			// Create a new SpriteBatch, which can be used to draw textures.
-			spriteBatch = new SpriteBatch(GraphicsDevice);
+			renderTarget = new RenderTarget2D(GraphicsDevice, 200, 200);
+			m_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// TODO: use this.Content to load your game content here
-			_checkers64 = Content.Load<Texture2D>("Checkers64");
+			texture = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+			Color clr = Color.Red;
+			// set half transparency on my texture
+			clr.A = 128;
+			Color[] bitmap = new Color[1] { clr };
+			texture.SetData(bitmap);
 		}
 
 		/// <summary>
@@ -73,9 +79,6 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			// Allows the game to exit
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-				this.Exit();
 			// TODO: Add your update logic here
 
 			base.Update(gameTime);
@@ -87,17 +90,29 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			GraphicsDevice.Clear(Color.CornflowerBlue);
+			GraphicsDevice.SetRenderTarget(renderTarget);
+			GraphicsDevice.Clear(Color.White);
 
-			Texture2D texture =  _checkers64;
-			
-			spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
-	
-			spriteBatch.Draw(texture, new Vector2(5, 5), null, Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
-	
-			spriteBatch.End();
+			BlendState myState = new BlendState();
+			// no blending on color
+			myState.ColorSourceBlend = Blend.Zero;
+			myState.ColorDestinationBlend = Blend.One;
+			// multiplicative blending on alpha
+			myState.AlphaSourceBlend = Blend.Zero;
+			myState.AlphaDestinationBlend = Blend.SourceAlpha;
 
-			base.Draw(gameTime);
+			m_spriteBatch.Begin(SpriteSortMode.Immediate, myState);
+			// draw my texture twice, with an overlaping part
+			m_spriteBatch.Draw(texture, new Vector2(0, 0), null, Color.White, 0, Vector2.Zero, 100, SpriteEffects.None, 0);
+			m_spriteBatch.Draw(texture, new Vector2(50, 50), null, Color.White, 0, Vector2.Zero, 100, SpriteEffects.None, 0);
+			m_spriteBatch.End();
+
+			GraphicsDevice.SetRenderTarget(null);
+
+			GraphicsDevice.Clear(Color.Green);
+			m_spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied);
+			m_spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
+			m_spriteBatch.End();
 		}
 	}
 }
