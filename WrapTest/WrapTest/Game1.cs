@@ -58,11 +58,8 @@ namespace WrapTest
 			// Create a new SpriteBatch, which can be used to draw textures.
 			spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			new System.Threading.Thread(delegate()
-			{
-				// TODO: use this.Content to load your game content here
-				_checkers64 = Content.Load<Texture2D>("Checkers64");
-			}).Start();
+			// TODO: use this.Content to load your game content here
+			_checkers64 = Content.Load<Texture2D>("Checkers64");
 		}
 
 		/// <summary>
