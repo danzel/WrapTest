@@ -1,17 +1,9 @@
 using System;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-#if ANDROID
-using Android.Graphics;
-using Java.Nio;
-#endif
-
-#if IOS
-using MonoTouch.UIKit;
-using MonoTouch.CoreGraphics;
-#endif
 
 namespace WrapTest
 {
@@ -30,10 +22,8 @@ namespace WrapTest
 			graphics = new GraphicsDeviceManager(this);
 			graphics.PreferredBackBufferWidth = 480;
 			graphics.PreferredBackBufferHeight = 320;
+			graphics.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
 			Content.RootDirectory = "Content";
-
-			IsFixedTimeStep = false;
-			graphics.SynchronizeWithVerticalRetrace = false;
 		}
 
 		/// <summary>
@@ -45,6 +35,8 @@ namespace WrapTest
 		protected override void Initialize()
 		{
 			// TODO: Add your initialization logic here
+			//graphics.ApplyChanges();
+
 
 			base.Initialize();
 		}
@@ -86,29 +78,19 @@ namespace WrapTest
 			base.Update(gameTime);
 		}
 
-		private DateTime firstFrame = DateTime.MinValue;
-		private int frameCount = 0;
-
 		/// <summary>
 		/// This is called when the game should draw itself.
 		/// </summary>
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			if (firstFrame == DateTime.MinValue)
-				firstFrame = DateTime.Now;
-			frameCount++;
-			if (frameCount == 120)
-			{
-				var end = DateTime.Now;
-				var taken = end - firstFrame;
-				Debugger.Break();
-			}
 			GraphicsDevice.Clear(Color.CornflowerBlue);
+
+			GraphicsDevice.ScissorRectangle = new Rectangle(53, 85, 80, 116);
 
 			if (_checkers64 != null)
 			{
-				spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
+				spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, null, new RasterizerState { ScissorTestEnable = true });
 
 				spriteBatch.Draw(_checkers64, new Vector2(5, 5), null, Color.White, 0, Vector2.Zero, 4, SpriteEffects.None, 0);
 
