@@ -28,12 +28,9 @@ namespace WrapTest
 		public Game1()
 		{
 			graphics = new GraphicsDeviceManager(this);
-			graphics.PreferredBackBufferWidth = 480;
-			graphics.PreferredBackBufferHeight = 320;
+			//graphics.PreferredBackBufferWidth = 480;
+			//graphics.PreferredBackBufferHeight = 320;
 			Content.RootDirectory = "Content";
-
-			IsFixedTimeStep = false;
-			graphics.SynchronizeWithVerticalRetrace = false;
 		}
 
 		/// <summary>
@@ -71,6 +68,8 @@ namespace WrapTest
 			// TODO: Unload any non ContentManager content here
 		}
 
+		private bool _spaceIsDown;
+
 		/// <summary>
 		/// Allows the game to run logic such as updating the world,
 		/// checking for collisions, gathering input, and playing audio.
@@ -78,16 +77,20 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			// Allows the game to exit
-			//if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-			//	this.Exit();
-			// TODO: Add your update logic here
+			var keyboardState = Keyboard.GetState();
+			if (keyboardState.IsKeyDown(Keys.Space) && !_spaceIsDown)
+			{
+				Console.WriteLine(DateTime.Now + " ToggleFullScreen");
+				graphics.ToggleFullScreen();
+
+				//Console.WriteLine("ApplyChanges IsFullScreen");
+				//graphics.IsFullScreen = true;
+				//graphics.ApplyChanges();
+			}
+			_spaceIsDown = keyboardState.IsKeyDown(Keys.Space);
 
 			base.Update(gameTime);
 		}
-
-		private DateTime firstFrame = DateTime.MinValue;
-		private int frameCount = 0;
 
 		/// <summary>
 		/// This is called when the game should draw itself.
@@ -95,15 +98,6 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			if (firstFrame == DateTime.MinValue)
-				firstFrame = DateTime.Now;
-			frameCount++;
-			if (frameCount == 120)
-			{
-				var end = DateTime.Now;
-				var taken = end - firstFrame;
-				Debugger.Break();
-			}
 			GraphicsDevice.Clear(Color.CornflowerBlue);
 
 			if (_checkers64 != null)
