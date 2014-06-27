@@ -1,18 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Color = Microsoft.Xna.Framework.Color;
-using File = System.IO.File;
 using Matrix = Microsoft.Xna.Framework.Matrix;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
@@ -83,6 +80,8 @@ namespace WrapTest
 			_checkers60 = Content.Load<Texture2D>("Checkers60");
 #endif
 			_checkers64 = Content.Load<Texture2D>("Checkers64");
+
+		    _tone = Content.Load<SoundEffect>("Tone");
 		}
 
 		/// <summary>
@@ -105,12 +104,16 @@ namespace WrapTest
 		{
 #if !PSS
 			// Allows the game to exit
-			if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-				this.Exit();
+			//if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+			//	this.Exit();
 			
 #if TOUCH
-			if (TouchPanel.GetState().Any(t => t.State == TouchLocationState.Pressed))
-				_mode = (_mode + 1) % 4;
+		    if (TouchPanel.GetState().Any(t => t.State == TouchLocationState.Pressed))
+		    {
+		        _mode = (_mode + 1) % 4;
+		        _tone.Play();
+
+		    }
 #else
 			var spacePressed = Keyboard.GetState().IsKeyDown(Keys.Space);
 
@@ -131,7 +134,9 @@ namespace WrapTest
 		int _drawCount = 0;
 		
 		double _first60fps;
-		/// <summary>
+	    private SoundEffect _tone;
+
+	    /// <summary>
 		/// This is called when the game should draw itself.
 		/// </summary>
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
@@ -198,58 +203,6 @@ namespace WrapTest
 
 			base.Draw(gameTime);
 			
-			byte[] screenData = new byte[GraphicsDevice.Viewport.Width * GraphicsDevice.Viewport.Height * 4];
-			GraphicsDevice.GetBackBufferData(screenData);
-			//This returns the screen in BGRA format in XNA
-
-#if WINDOWS
-#if !(WINDOWS && DIRECTX)
-			//In XNA and MonoGame.OpenGL we need to swap the R and B bytes so we are in RGBA
-			for (var i = 0; i < screenData.Length; i += 4)
-			{
-				byte temp = screenData[i];
-				screenData[i] = screenData[i + 2];
-				screenData[i + 2] = temp;
-			}
-#endif
-
-			using (var bitmap = new Bitmap(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height))
-			{
-				var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb); //This is actually RGBA byte format
-
-				Marshal.Copy(screenData, 0, data.Scan0, screenData.Length);
-
-				bitmap.UnlockBits(data);
-
-				bitmap.Save("out.png", ImageFormat.Png);
-			}
-#endif
-
-#if IOS
-			using (var colorSpace = CGColorSpace.CreateDeviceRGB())
-			using (var provider = new CGDataProvider(screenData, 0, screenData.Length))
-			using (var cgImage = new CGImage(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, 8, 4 * 8, 4 * GraphicsDevice.Viewport.Width, colorSpace, CGBitmapFlags.ByteOrderDefault, provider, null, false, CGColorRenderingIntent.Default))
-			using (var image = UIImage.FromImage(cgImage))
-			{
-				image.SaveToPhotosAlbum(null);
-			}
-#endif
-
-#if ANDROID
-			using (var buffer = ByteBuffer.Wrap(screenData))
-			using (var bitmap = Bitmap.CreateBitmap(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, Bitmap.Config.Argb8888))
-			{
-				bitmap.CopyPixelsFromBuffer(buffer);
-
-				var filename = System.IO.Path.Combine(Android.OS.Environment.ExternalStorageDirectory.AbsolutePath, "out.png");
-
-				//Make sure you have <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-				using (var output = File.OpenWrite(filename))
-				{
-					bitmap.Compress(Bitmap.CompressFormat.Png, 100, output);
-				}
-			}
-#endif
 		}
 	}
 }
