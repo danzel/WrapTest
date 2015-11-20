@@ -64,15 +64,6 @@
     <Folder Include="Resources\Layout\" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidAsset Include="..\WrapTestContent\Checkers60.png">
-      <Link>Content\Checkers60.png</Link>
-    </AndroidAsset>
-    <AndroidAsset Include="..\WrapTestContent\Checkers64.png">
-      <Link>Content\Checkers64.png</Link>
-    </AndroidAsset>
-    <AndroidAsset Include="..\WrapTestContent\Tone.wav">
-      <Link>Content\Tone.wav</Link>
-    </AndroidAsset>
     <Content Include="..\WrapTest\WrapTestContent\Checkers60.png">
       <Link>Content\Checkers60.png</Link>
     </Content>
@@ -88,6 +79,23 @@
       <Project>{BA9476CF-99BA-4D03-92F2-73D2C5E58883}</Project>
       <Name>MonoGame.Framework.Android</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAsset Include="..\WrapTestContent\buttonPress.xnb">
+      <Link>Content\buttonPress.xnb</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\WrapTestContent\Checkers60.xnb">
+      <Link>Content\Checkers60.xnb</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\WrapTestContent\Checkers64.xnb">
+      <Link>Content\Checkers64.xnb</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\WrapTestContent\match.xnb">
+      <Link>Content\match.xnb</Link>
+    </AndroidAsset>
+    <AndroidAsset Include="..\WrapTestContent\Tone.xnb">
+      <Link>Content\Tone.xnb</Link>
+    </AndroidAsset>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

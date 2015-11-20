@@ -1,55 +1,31 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
-using Color = Microsoft.Xna.Framework.Color;
-using Matrix = Microsoft.Xna.Framework.Matrix;
-using Rectangle = Microsoft.Xna.Framework.Rectangle;
-
-#if ANDROID
-using Android.Graphics;
-using Java.Nio;
-#endif
-
-#if IOS
-using MonoTouch.UIKit;
-using MonoTouch.CoreGraphics;
-#endif
-
-#if WINDOWS
-using System.Drawing.Imaging;
-#endif
-
-#if TOUCH
 using Microsoft.Xna.Framework.Input.Touch;
-#endif
 
 namespace WrapTest
 {
 	/// <summary>
 	/// This is the main type for your game
 	/// </summary>
-	public class Game1 : Microsoft.Xna.Framework.Game
+	public class Game1 : Game
 	{
-		GraphicsDeviceManager graphics;
-		SpriteBatch spriteBatch;
+		readonly GraphicsDeviceManager graphics;
+		SpriteBatch _spriteBatch;
 
 		private int _mode = 1;
 		private Texture2D _checkers60;
 		private Texture2D _checkers64;
 
+		private SoundEffect _soundButtonPress, _soundMatch, _soundTone;
+
 		public Game1()
 		{
 			graphics = new GraphicsDeviceManager(this);
-			graphics.PreferredBackBufferWidth = 480;
-			graphics.PreferredBackBufferHeight = 320;
+			graphics.PreferredBackBufferWidth = 320;
+			graphics.PreferredBackBufferHeight = 480;
 			Content.RootDirectory = "Content";
 		}
 
@@ -73,15 +49,15 @@ namespace WrapTest
 		protected override void LoadContent()
 		{
 			// Create a new SpriteBatch, which can be used to draw textures.
-			spriteBatch = new SpriteBatch(GraphicsDevice);
+			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
 			// TODO: use this.Content to load your game content here
-#if !WINDOWS_PHONE //Loading 2 textures from .png fails on Windows phone, since we are a hack job just load one
 			_checkers60 = Content.Load<Texture2D>("Checkers60");
-#endif
 			_checkers64 = Content.Load<Texture2D>("Checkers64");
 
-		    _tone = Content.Load<SoundEffect>("Tone");
+			_soundButtonPress = Content.Load<SoundEffect>("buttonPress");
+			_soundMatch = Content.Load<SoundEffect>("match");
+			_soundTone = Content.Load<SoundEffect>("Tone");
 		}
 
 		/// <summary>
@@ -93,7 +69,7 @@ namespace WrapTest
 			// TODO: Unload any non ContentManager content here
 		}
 
-		bool _spaceWasPressed;
+		private Random _rand = new Random(1);
 
 		/// <summary>
 		/// Allows the game to run logic such as updating the world,
@@ -102,107 +78,37 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-#if !PSS
-			// Allows the game to exit
-			//if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-			//	this.Exit();
-			
-#if TOUCH
-		    if (TouchPanel.GetState().Any(t => t.State == TouchLocationState.Pressed))
-		    {
-		        _mode = (_mode + 1) % 4;
-		        _tone.Play();
-
-		    }
-#else
-			var spacePressed = Keyboard.GetState().IsKeyDown(Keys.Space);
-
-			if (spacePressed && !_spaceWasPressed)
+			var touch = TouchPanel.GetState().FirstOrDefault(t => t.State == TouchLocationState.Pressed);
+			if (touch != default(TouchLocation))
 			{
-				_mode = (_mode + 1) % 4;
+				if (touch.Position.Y < GraphicsDevice.Viewport.Height / 2)
+				{
+					_soundMatch.Play(1, (float)(_rand.NextDouble() * 2 - 1), 0);
+				}
+				else
+				{
+					_soundTone.Play();
+				}
 			}
-
-			_spaceWasPressed = spacePressed;
-#endif
-#endif
-			// TODO: Add your update logic here
 
 			base.Update(gameTime);
 		}
-		
-		DateTime _firstDrawTime;
-		int _drawCount = 0;
-		
-		double _first60fps;
-	    private SoundEffect _tone;
-
-	    /// <summary>
+		/// <summary>
 		/// This is called when the game should draw itself.
 		/// </summary>
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			if (_drawCount == 0)
-				_firstDrawTime = DateTime.Now;
-			_drawCount ++;
-			if (_drawCount == 60)
-			{
-				DateTime end = DateTime.Now;
-				TimeSpan timeTaken = end - _firstDrawTime;
-				_first60fps = 60 / timeTaken.TotalSeconds;
-				
-				_firstDrawTime = end;
-			}
-			if (_drawCount == 120)
-			{
-				DateTime end = DateTime.Now;
-				TimeSpan timeTaken = end - _firstDrawTime;
-				
-				var first = _first60fps;
-				var second = 60 / timeTaken.TotalSeconds;
-			}
-			
 			GraphicsDevice.Clear(Color.CornflowerBlue);
+			_spriteBatch.Begin();
 
-			Texture2D texture = (_mode % 2 == 0) ? _checkers60 : _checkers64;
-			
-			//for (int i = 0; i < 10; i++)
-			{
-				if (_mode < 2) //Without matrix
-					spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null);
-				else //With matrix to rotate whole screen 180
-					spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, null, null, null, Matrix.CreateRotationZ(MathHelper.ToRadians(180)) * Matrix.CreateTranslation(480, 320, 0));
-	
-				var size = new Vector2(texture.Width, texture.Height);
-	
-				//Plain
-				spriteBatch.Draw(texture, new Vector2(5, 5), new Rectangle(0, 0, (int)size.X, (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-				//2x across
-				spriteBatch.Draw(texture, new Vector2(5, 10 + size.Y), new Rectangle(0, 0, (int)size.X * 2, (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-				//2x down
-				spriteBatch.Draw(texture, new Vector2(5, 15 + 2 *size.Y), new Rectangle(0, 0, (int)size.X, (int)size.Y * 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-				//2x2 down
-				spriteBatch.Draw(texture, new Vector2(10 + size.X, 15 + 2 * size.Y), new Rectangle(0, 0, (int)size.X * 2, (int)size.Y * 2), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-				//1.5 across
-				spriteBatch.Draw(texture, new Vector2(10 + size.X, 5), new Rectangle(0, 0, (int)(size.X * 1.5f), (int)size.Y), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-				//1.5 down
-				spriteBatch.Draw(texture, new Vector2(15 + 2.5f * size.X, 5), new Rectangle(0, 0, (int)size.X, (int)(size.Y * 1.5f)), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-				//1.5x1.5
-				spriteBatch.Draw(texture, new Vector2(20 + 3.5f * size.X, 5), new Rectangle(0, 0, (int)(size.X * 1.5f), (int)(size.Y * 1.5f)), Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-	
-	
-				spriteBatch.End();
-			}
-			// TODO: Add your drawing code here
+			_spriteBatch.Draw(_checkers60, Vector2.Zero, Color.White);
+
+
+			_spriteBatch.End();
 
 			base.Draw(gameTime);
-			
+
 		}
 	}
 }

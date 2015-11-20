@@ -1,0 +1,1 @@
+..\..\..\MonoGame\Tools\MGCB\bin\Windows\AnyCPU\Debug\MGCB.exe /quiet /incremental /platform:Android /build:buttonPress.wav /build:Checkers60.png /build:Checkers64.png /build:match.wav /build:Tone.wav

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SourceFile>C:/Users/dave/Code/WrapTest/WrapTest/WrapTestContent/buttonPress.wav</SourceFile>
+  <SourceTime>2015-02-27T08:34:56.6126822+13:00</SourceTime>
+  <DestFile>C:/Users/dave/Code/WrapTest/WrapTest/WrapTestContent/buttonPress.xnb</DestFile>
+  <DestTime>2015-11-21T11:27:09.1753567+13:00</DestTime>
+  <Importer>WavImporter</Importer>
+  <ImporterTime>2015-11-21T11:24:45.8230552+13:00</ImporterTime>
+  <Processor>SoundEffectProcessor</Processor>
+  <ProcessorTime>2015-11-21T11:24:45.8230552+13:00</ProcessorTime>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>
