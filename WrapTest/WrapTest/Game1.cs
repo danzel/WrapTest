@@ -70,6 +70,7 @@ namespace WrapTest
 		}
 
 		private Random _rand = new Random(1);
+		private TouchLocation _touch;
 
 		/// <summary>
 		/// Allows the game to run logic such as updating the world,
@@ -78,10 +79,10 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Update(GameTime gameTime)
 		{
-			var touch = TouchPanel.GetState().FirstOrDefault(t => t.State == TouchLocationState.Pressed);
-			if (touch != default(TouchLocation))
+			_touch = TouchPanel.GetState().FirstOrDefault(t => t.State == TouchLocationState.Pressed);
+			if (_touch != default(TouchLocation))
 			{
-				if (touch.Position.Y < GraphicsDevice.Viewport.Height / 2)
+				if (_touch.Position.Y < GraphicsDevice.Viewport.Height / 2)
 				{
 					_soundMatch.Play(1, (float)(_rand.NextDouble() * 2 - 1), 0);
 				}
@@ -99,7 +100,7 @@ namespace WrapTest
 		/// <param name="gameTime">Provides a snapshot of timing values.</param>
 		protected override void Draw(GameTime gameTime)
 		{
-			GraphicsDevice.Clear(Color.CornflowerBlue);
+			GraphicsDevice.Clear(_touch == default(TouchLocation) ? Color.CornflowerBlue : Color.Red);
 			_spriteBatch.Begin();
 
 			_spriteBatch.Draw(_checkers60, Vector2.Zero, Color.White);
